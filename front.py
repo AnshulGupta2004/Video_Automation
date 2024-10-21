@@ -124,68 +124,76 @@ def main():
     vehicle_numbers = [vn.strip() for vn in vehicle_numbers_input.split(',') if vn.strip()]
     intro_script = f"Discover Nxcar certified cars at {dealer_name}."
     updated_intro_script = st.text_area("Edit Intro Script", intro_script, height=50)
+
     if st.button("Generate Scripts"):
-        workbook = xlsxwriter.Workbook('dealer_cars.xlsx')
-        worksheet = workbook.add_worksheet()
-        columns = [
-            'Dealer Name', 'Make', 'Model Variant', 'Year', 'Distance',
-            'Reg Date', 'List Price', 'Offer Price', 'Owner', 'Colour', 'Fuel',
-            'Left Image', 'Right Image', 'Front-Right Image'
-        ]
-        for col_num, header in enumerate(columns):
-            worksheet.write(0, col_num, header)
-        row_index = 1
-        scripts = {}
-        for vehiclenumber in vehicle_numbers:
-            car_info = get_info(vehiclenumber)
-            if car_info and 'downloadLinks' in car_info:
-                print(f"Vehicle: {vehiclenumber}")
-                download_and_save_images(vehiclenumber, car_info['downloadLinks'])
-            car_info = rc_detail(vehiclenumber)
-            if car_info:
-                make = car_info.get('rc_report_generate', {}).get('vehicleManufacturerName', 'N/A')
-                model_variant = car_info.get('rc_report_generate', {}).get('model', 'N/A')
-                year = car_info.get("makeYear", "N/A").split("/")[-1]
-                distance = car_info.get("kilometers", 'N/A') + " Km"
-                reg_date = car_info.get('rc_report_generate', {}).get('regDate', 'N/A')
-                list_price = car_info.get("listPrice", 'N/A')
-                offer_price = car_info.get("offerPrice", 'N/A')
-                owner = str(car_info.get('ownership', 'N/A')) + " Owner"
-                colour = car_info.get('rc_report_generate', {}).get('vehicleColour', 'N/A')
-                fuel = car_info.get("fuelType", 'N/A')
-                data = [
-                    dealer_name, make, model_variant, year, distance,
-                    reg_date, list_price, offer_price, owner, colour, fuel,
-                    f"car/{vehiclenumber}/2.png", f"car/{vehiclenumber}/3.png", f"car/{vehiclenumber}/4.png"
-                ]
-                for col_num, value in enumerate(data):
-                    if col_num < len(columns) - 3:
-                        worksheet.write(row_index, col_num, value)
-                image_paths = [
-                    f"car/{vehiclenumber}/2.png",
-                    f"car/{vehiclenumber}/3.png",
-                    f"car/{vehiclenumber}/4.png"
-                ]
-                for i, path in enumerate(image_paths, start=11):
-                    if os.path.exists(path):
-                        worksheet.insert_image(row_index, i, path)
-                    else:
-                        print(f"Image not found: {path}")
-                prompt = f"""Get {make.split(" ")[0]} {model_variant} {year} with a price of {list_price} rupees only."""
-                scripts[vehiclenumber] = prompt
-                row_index += 1
-        workbook.close()
-        st.session_state['scripts'] = scripts
-        st.session_state['dealer_name'] = dealer_name
-        st.session_state['intro_script'] = updated_intro_script
-        st.success("Scripts generated successfully. You can now edit them.")
+        if 'scripts_generated' not in st.session_state:
+            workbook = xlsxwriter.Workbook('dealer_cars.xlsx')
+            worksheet = workbook.add_worksheet()
+            columns = [
+                'Dealer Name', 'Make', 'Model Variant', 'Year', 'Distance',
+                'Reg Date', 'List Price', 'Offer Price', 'Owner', 'Colour', 'Fuel',
+                'Left Image', 'Right Image', 'Front-Right Image'
+            ]
+            for col_num, header in enumerate(columns):
+                worksheet.write(0, col_num, header)
+            row_index = 1
+            scripts = {}
+            for vehiclenumber in vehicle_numbers:
+                car_info = get_info(vehiclenumber)
+                if car_info and 'downloadLinks' in car_info:
+                    print(f"Vehicle: {vehiclenumber}")
+                    download_and_save_images(vehiclenumber, car_info['downloadLinks'])
+                car_info = rc_detail(vehiclenumber)
+                if car_info:
+                    make = car_info.get('rc_report_generate', {}).get('vehicleManufacturerName', 'N/A')
+                    model_variant = car_info.get('rc_report_generate', {}).get('model', 'N/A')
+                    year = car_info.get("makeYear", "N/A").split("/")[-1]
+                    distance = car_info.get("kilometers", 'N/A') + " Km"
+                    reg_date = car_info.get('rc_report_generate', {}).get('regDate', 'N/A')
+                    list_price = car_info.get("listPrice", 'N/A')
+                    offer_price = car_info.get("offerPrice", 'N/A')
+                    owner = str(car_info.get('ownership', 'N/A')) + " Owner"
+                    colour = car_info.get('rc_report_generate', {}).get('vehicleColour', 'N/A')
+                    fuel = car_info.get("fuelType", 'N/A')
+                    data = [
+                        dealer_name, make, model_variant, year, distance,
+                        reg_date, list_price, offer_price, owner, colour, fuel,
+                        f"car/{vehiclenumber}/2.png", f"car/{vehiclenumber}/3.png", f"car/{vehiclenumber}/4.png"
+                    ]
+                    for col_num, value in enumerate(data):
+                        if col_num < len(columns) - 3:
+                            worksheet.write(row_index, col_num, value)
+                    image_paths = [
+                        f"car/{vehiclenumber}/2.png",
+                        f"car/{vehiclenumber}/3.png",
+                        f"car/{vehiclenumber}/4.png"
+                    ]
+                    for i, path in enumerate(image_paths, start=11):
+                        if os.path.exists(path):
+                            worksheet.insert_image(row_index, i, path)
+                        else:
+                            print(f"Image not found: {path}")
+                    prompt = f"""Get {make.split(" ")[0]} {model_variant} {year} with a price of {list_price} rupees only."""
+
+                    scripts[vehiclenumber] = prompt
+                    row_index += 1
+            workbook.close()
+            st.session_state['scripts'] = scripts
+            st.session_state['dealer_name'] = dealer_name
+            st.session_state['intro_script'] = updated_intro_script
+            st.session_state['scripts_generated'] = True
+            st.session_state['audio_generated'] = False
+            st.success("Scripts generated successfully. You can now edit them.")
+
     if 'scripts' in st.session_state:
         st.header("Edit Generated Scripts")
         updated_scripts = {}
         for vehiclenumber, script in st.session_state['scripts'].items():
             updated_script = st.text_area(f"Script for vehicle {vehiclenumber}", script, height=100)
             updated_scripts[vehiclenumber] = updated_script
-        if st.button("Generate Audio Files"):
+        st.session_state['scripts'] = updated_scripts
+
+        if st.button("Generate Audio Files") and not st.session_state.get('audio_generated', False):
             output_folder = "output_audio"
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
@@ -194,14 +202,19 @@ def main():
                 text_to_speech(script, tts_filename, voice_id="bUTE2M5LdnqaUCd5tJB3")
             intro_filename = f"{output_folder}/intro_script.mp3"
             text_to_speech(st.session_state['intro_script'], intro_filename, voice_id="bUTE2M5LdnqaUCd5tJB3")
+            st.session_state['audio_generated'] = True
             st.success("Audio files generated successfully.")
-            for file in os.listdir(output_folder):
-                if file.endswith(".mp3"):
-                    with open(os.path.join(output_folder, file), "rb") as f:
-                        st.download_button(f"Download {file}", f, file_name=file)
+
+    if st.session_state.get('audio_generated', False):
+        output_folder = "output_audio"
+        for file in os.listdir(output_folder):
+            if file.endswith(".mp3"):
+                with open(os.path.join(output_folder, file), "rb") as f:
+                    st.download_button(f"Download {file}", f, file_name=file)
+
+    if st.session_state.get('scripts_generated', False):
         with open("dealer_cars.xlsx", "rb") as f:
             st.download_button("Download Excel File", f, file_name="dealer_cars.xlsx")
-
 
 if __name__ == "__main__":
     main()
