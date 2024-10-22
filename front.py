@@ -133,7 +133,7 @@ def text_to_speech(text, filename, voice_id):
 
 def main():
     st.title("Nxcar Vehicle Promotion Script Generator")
-    dealer_name = st.text_input("Enter Dealer Name:", "ABC Dealer")
+    dealer_name = st.text_input("Enter Dealer Name:")
     
     # Introduce a new key to track vehicle numbers input
     vehicle_numbers_input = st.text_area("Enter Vehicle Numbers (comma separated):", key="vehicle_numbers_input")
@@ -208,7 +208,7 @@ def main():
             st.session_state['intro_script'] = updated_intro_script
             st.session_state['scripts_generated'] = True
             st.session_state['audio_generated'] = False
-            st.success("Scripts generated successfully. You can now edit them.")
+            st.success("Scripts generated successfully. You can now edit them. Just Remove Extra Name in Variant Like From Celerio VXI Remove VXI")
 
     if 'scripts' in st.session_state:
         st.header("Edit Generated Scripts")
