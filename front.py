@@ -9,6 +9,7 @@ from groq import Groq
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
 import shutil
+import re
 
 load_dotenv()
 
@@ -230,7 +231,8 @@ def main():
             for vehiclenumber, script in updated_scripts.items():
                 car_info = rc_detail(vehiclenumber)
                 model_variant = car_info.get('rc_report_generate', {}).get('model', vehiclenumber) if car_info else vehiclenumber
-                tts_filename = f"{output_folder}/{model_variant}_script.mp3"
+                clean_variant = re.sub(r'[\\/]', '', model_variant)
+                tts_filename = f"{output_folder}/{clean_variant}_script.mp3"
                 text_to_speech(script, tts_filename, voice_id="bUTE2M5LdnqaUCd5tJB3")
             intro_filename = f"{output_folder}/intro_script.mp3"
             text_to_speech(st.session_state['intro_script'], intro_filename, voice_id="bUTE2M5LdnqaUCd5tJB3")
