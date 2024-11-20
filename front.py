@@ -199,7 +199,7 @@ def main():
                             worksheet.insert_image(row_index, i, path)
                         else:
                             print(f"Image not found: {path}")
-                    prompt = f"""Get {make.split(" ")[0]} {model_variant} {year} with a price of {list_price} rupees only."""
+                    prompt = f"""{make.split(" ")[0]} {model_variant} {year} with a price of {list_price} rupees only."""
 
                     scripts[vehiclenumber] = prompt
                     row_index += 1
